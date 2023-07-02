@@ -1,4 +1,5 @@
 import os 
+import re
 
 
 # Class to initize the self and filepath and filename for python
@@ -32,7 +33,7 @@ for each_postfix in python_file_dir:
 
 comment_pattern = r"#.*$|'''[\s\S]*?'''|\"\"\"[\s\S]*?\"\"\""
 
-#print(files)
+
 
 
 for file_obj in files:
@@ -40,33 +41,17 @@ for file_obj in files:
     line_switch = 0
 
     with open(file_obj.filepath,'r') as file:
-        lines = file.readlines()
+        content = file.read()
         
-    for line in lines:
-        line_index += 1
-        line = line.strip()
-        
-        
-        if line.startswith('#'):  
-            file_obj.add_comments(line[:].strip())
-        # Assumes single-line comments start with 
 
-        if line.startswith("'''") or line.startswith('"""'):
-            if line_switch < 2:
-                line_switch += 1
-
-        if line_switch == 1:
-            file_obj.add_comments(line[:].strip())
-        elif line_switch == 0:
-            continue
-        else:
-            file_obj.add_comments(line[:].strip())
-            line_switch = 0
+    comments = re.findall(comment_pattern, content,re.MULTILINE)
+    
+    file_obj.comments.extend(comments)
 
     filename = file_obj.get_rst_filename()
 
-    with open(filename,'a') as md_file:
-        for comments in file_obj.comments:
-            md_file.write(comments + '\n')
+    with open(filename, 'a') as md_file:
+        for comment in file_obj.comments:
+            md_file.write(comment.strip() + '\n')
 
-
+ 
